@@ -12,7 +12,9 @@ import { ArrowLeft, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import type { RecipeCategory, Ingredient, Instruction, RecipeVisibility } from '@/types/database'
 
-export default function NewRecipePage() {
+import { Suspense } from 'react'
+
+function NewRecipeContent() {
     const { user } = useAuth()
     const router = useRouter()
     const searchParams = useSearchParams()
@@ -218,242 +220,254 @@ export default function NewRecipePage() {
     const defaultUnit = category === 'baking' ? 'metric' : 'imperial'
 
     return (
-        <ProtectedRoute>
-            <div className="min-h-screen bg-gray-50">
-                {/* Header */}
-                <header className="bg-white shadow-sm border-b">
-                    <div className="container mx-auto px-4 py-4">
-                        <Link
-                            href="/recipes"
-                            className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900"
-                        >
-                            <ArrowLeft className="w-5 h-5" />
-                            <span className="font-medium">Back to Recipes</span>
-                        </Link>
+        <div className="min-h-screen bg-gray-50">
+            {/* Header */}
+            <header className="bg-white shadow-sm border-b">
+                <div className="container mx-auto px-4 py-4">
+                    <Link
+                        href="/recipes"
+                        className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900"
+                    >
+                        <ArrowLeft className="w-5 h-5" />
+                        <span className="font-medium">Back to Recipes</span>
+                    </Link>
+                </div>
+            </header>
+
+            {/* Main Content */}
+            <main className="container mx-auto px-4 py-8">
+                <div className="max-w-3xl mx-auto">
+                    <div className="mb-8">
+                        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                            {variantOfId ? 'Create Recipe Variation' : 'Create New Recipe'}
+                        </h1>
+                        {parentRecipeTitle && (
+                            <p className="text-sm text-gray-600 flex items-center gap-2">
+                                <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded-md font-medium">
+                                    Variation of: {parentRecipeTitle}
+                                </span>
+                            </p>
+                        )}
                     </div>
-                </header>
 
-                {/* Main Content */}
-                <main className="container mx-auto px-4 py-8">
-                    <div className="max-w-3xl mx-auto">
-                        <div className="mb-8">
-                            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                                {variantOfId ? 'Create Recipe Variation' : 'Create New Recipe'}
-                            </h1>
-                            {parentRecipeTitle && (
-                                <p className="text-sm text-gray-600 flex items-center gap-2">
-                                    <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded-md font-medium">
-                                        Variation of: {parentRecipeTitle}
-                                    </span>
-                                </p>
-                            )}
+                    {loadingParent && (
+                        <div className="mb-6 p-4 rounded-lg bg-blue-50 border border-blue-200 flex items-center gap-3">
+                            <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+                            <p className="text-sm text-blue-600">Loading parent recipe...</p>
                         </div>
+                    )}
 
-                        {loadingParent && (
-                            <div className="mb-6 p-4 rounded-lg bg-blue-50 border border-blue-200 flex items-center gap-3">
-                                <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
-                                <p className="text-sm text-blue-600">Loading parent recipe...</p>
+                    {error && (
+                        <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200">
+                            <p className="text-sm text-red-600">{error}</p>
+                        </div>
+                    )}
+
+                    <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-md p-8 space-y-6">
+                        {/* Basic Info */}
+                        <div className="space-y-4">
+                            <h2 className="text-lg font-semibold text-gray-900">Basic Information</h2>
+
+                            <div>
+                                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Recipe Title *
+                                </label>
+                                <input
+                                    id="title"
+                                    type="text"
+                                    value={title}
+                                    onChange={(e) => setTitle(e.target.value)}
+                                    required
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                    placeholder="e.g., Grandma's Chocolate Chip Cookies"
+                                />
                             </div>
-                        )}
 
-                        {error && (
-                            <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200">
-                                <p className="text-sm text-red-600">{error}</p>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Recipe Photo
+                                </label>
+                                <ImageUpload
+                                    value={mainImage?.url}
+                                    onChange={(url, storagePath) => setMainImage({ url, storagePath })}
+                                    onRemove={() => setMainImage(null)}
+                                    className="w-full sm:w-2/3"
+                                />
                             </div>
-                        )}
 
-                        <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-md p-8 space-y-6">
-                            {/* Basic Info */}
-                            <div className="space-y-4">
-                                <h2 className="text-lg font-semibold text-gray-900">Basic Information</h2>
+                            <div>
+                                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Description
+                                </label>
+                                <textarea
+                                    id="description"
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                    rows={3}
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                    placeholder="What makes this recipe special?"
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div>
+                                    <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+                                        Category *
+                                    </label>
+                                    <select
+                                        id="category"
+                                        value={category}
+                                        onChange={(e) => setCategory(e.target.value as RecipeCategory)}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                    >
+                                        <option value="cooking">Cooking</option>
+                                        <option value="baking">Baking</option>
+                                        <option value="beverage">Beverage</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        {category === 'baking' ? 'Defaults to metric units' : 'Defaults to imperial units'}
+                                    </p>
+                                </div>
 
                                 <div>
-                                    <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Recipe Title *
+                                    <label htmlFor="visibility" className="block text-sm font-medium text-gray-700 mb-2">
+                                        Visibility
+                                    </label>
+                                    <select
+                                        id="visibility"
+                                        value={visibility}
+                                        onChange={(e) => setVisibility(e.target.value as RecipeVisibility)}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                    >
+                                        <option value="private">Private (Only Me)</option>
+                                        <option value="household">Household (Members Only)</option>
+                                        <option value="followers">Followers (Members + Followers)</option>
+                                        <option value="public">Public (Everyone)</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label htmlFor="servings" className="block text-sm font-medium text-gray-700 mb-2">
+                                        Servings *
                                     </label>
                                     <input
-                                        id="title"
-                                        type="text"
-                                        value={title}
-                                        onChange={(e) => setTitle(e.target.value)}
+                                        id="servings"
+                                        type="number"
+                                        min="1"
+                                        value={servings}
+                                        onChange={(e) => setServings(e.target.value)}
                                         required
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                                        placeholder="e.g., Grandma's Chocolate Chip Cookies"
                                     />
                                 </div>
+                            </div>
 
+                            <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Recipe Photo
-                                    </label>
-                                    <ImageUpload
-                                        value={mainImage?.url}
-                                        onChange={(url, storagePath) => setMainImage({ url, storagePath })}
-                                        onRemove={() => setMainImage(null)}
-                                        className="w-full sm:w-2/3"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Description
-                                    </label>
-                                    <textarea
-                                        id="description"
-                                        value={description}
-                                        onChange={(e) => setDescription(e.target.value)}
-                                        rows={3}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                                        placeholder="What makes this recipe special?"
-                                    />
-                                </div>
-
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                    <div>
-                                        <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
-                                            Category *
-                                        </label>
-                                        <select
-                                            id="category"
-                                            value={category}
-                                            onChange={(e) => setCategory(e.target.value as RecipeCategory)}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                                        >
-                                            <option value="cooking">Cooking</option>
-                                            <option value="baking">Baking</option>
-                                            <option value="beverage">Beverage</option>
-                                            <option value="other">Other</option>
-                                        </select>
-                                        <p className="text-xs text-gray-500 mt-1">
-                                            {category === 'baking' ? 'Defaults to metric units' : 'Defaults to imperial units'}
-                                        </p>
-                                    </div>
-
-                                    <div>
-                                        <label htmlFor="visibility" className="block text-sm font-medium text-gray-700 mb-2">
-                                            Visibility
-                                        </label>
-                                        <select
-                                            id="visibility"
-                                            value={visibility}
-                                            onChange={(e) => setVisibility(e.target.value as RecipeVisibility)}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                                        >
-                                            <option value="private">Private (Only Me)</option>
-                                            <option value="household">Household (Members Only)</option>
-                                            <option value="followers">Followers (Members + Followers)</option>
-                                            <option value="public">Public (Everyone)</option>
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <label htmlFor="servings" className="block text-sm font-medium text-gray-700 mb-2">
-                                            Servings *
-                                        </label>
-                                        <input
-                                            id="servings"
-                                            type="number"
-                                            min="1"
-                                            value={servings}
-                                            onChange={(e) => setServings(e.target.value)}
-                                            required
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label htmlFor="prepTime" className="block text-sm font-medium text-gray-700 mb-2">
-                                            Prep Time (minutes)
-                                        </label>
-                                        <input
-                                            id="prepTime"
-                                            type="number"
-                                            min="0"
-                                            value={prepTime}
-                                            onChange={(e) => setPrepTime(e.target.value)}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label htmlFor="cookTime" className="block text-sm font-medium text-gray-700 mb-2">
-                                            Cook Time (minutes)
-                                        </label>
-                                        <input
-                                            id="cookTime"
-                                            type="number"
-                                            min="0"
-                                            value={cookTime}
-                                            onChange={(e) => setCookTime(e.target.value)}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label htmlFor="sourceUrl" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Source URL (Optional)
+                                    <label htmlFor="prepTime" className="block text-sm font-medium text-gray-700 mb-2">
+                                        Prep Time (minutes)
                                     </label>
                                     <input
-                                        id="sourceUrl"
-                                        type="url"
-                                        value={sourceUrl}
-                                        onChange={(e) => setSourceUrl(e.target.value)}
+                                        id="prepTime"
+                                        type="number"
+                                        min="0"
+                                        value={prepTime}
+                                        onChange={(e) => setPrepTime(e.target.value)}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                                        placeholder="https://example.com/recipe"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label htmlFor="cookTime" className="block text-sm font-medium text-gray-700 mb-2">
+                                        Cook Time (minutes)
+                                    </label>
+                                    <input
+                                        id="cookTime"
+                                        type="number"
+                                        min="0"
+                                        value={cookTime}
+                                        onChange={(e) => setCookTime(e.target.value)}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                     />
                                 </div>
                             </div>
 
-                            {/* Divider */}
-                            <div className="border-t border-gray-200" />
-
-                            {/* Ingredients */}
-                            <IngredientInput
-                                ingredients={ingredients}
-                                onChange={setIngredients}
-                                defaultUnit={defaultUnit}
-                            />
-
-                            {/* Divider */}
-                            <div className="border-t border-gray-200" />
-
-                            {/* Instructions */}
-                            <InstructionInput
-                                instructions={instructions}
-                                onChange={setInstructions}
-                            />
-
-                            {/* Submit */}
-                            <div className="flex gap-4 pt-4">
-                                <button
-                                    type="button"
-                                    onClick={() => router.back()}
-                                    className="flex-1 px-6 py-3 border border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={loading}
-                                    className="flex-1 px-6 py-3 bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-semibold rounded-lg transition-colors flex items-center justify-center"
-                                >
-                                    {loading ? (
-                                        <>
-                                            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                                            Creating...
-                                        </>
-                                    ) : (
-                                        variantOfId ? 'Create Variation' : 'Create Recipe'
-                                    )}
-                                </button>
+                            <div>
+                                <label htmlFor="sourceUrl" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Source URL (Optional)
+                                </label>
+                                <input
+                                    id="sourceUrl"
+                                    type="url"
+                                    value={sourceUrl}
+                                    onChange={(e) => setSourceUrl(e.target.value)}
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                    placeholder="https://example.com/recipe"
+                                />
                             </div>
-                        </form>
-                    </div>
-                </main>
-            </div>
+                        </div>
+
+                        {/* Divider */}
+                        <div className="border-t border-gray-200" />
+
+                        {/* Ingredients */}
+                        <IngredientInput
+                            ingredients={ingredients}
+                            onChange={setIngredients}
+                            defaultUnit={defaultUnit}
+                        />
+
+                        {/* Divider */}
+                        <div className="border-t border-gray-200" />
+
+                        {/* Instructions */}
+                        <InstructionInput
+                            instructions={instructions}
+                            onChange={setInstructions}
+                        />
+
+                        {/* Submit */}
+                        <div className="flex gap-4 pt-4">
+                            <button
+                                type="button"
+                                onClick={() => router.back()}
+                                className="flex-1 px-6 py-3 border border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="flex-1 px-6 py-3 bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-semibold rounded-lg transition-colors flex items-center justify-center"
+                            >
+                                {loading ? (
+                                    <>
+                                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                                        Creating...
+                                    </>
+                                ) : (
+                                    variantOfId ? 'Create Variation' : 'Create Recipe'
+                                )}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </main>
+        </div>
+    )
+}
+
+export default function NewRecipePage() {
+    return (
+        <ProtectedRoute>
+            <Suspense fallback={
+                <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                    <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+                </div>
+            }>
+                <NewRecipeContent />
+            </Suspense>
         </ProtectedRoute>
     )
 }
