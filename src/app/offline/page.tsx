@@ -86,7 +86,7 @@ export default function OfflineRecipesPage() {
                                     <div className="flex items-center gap-4 text-sm text-gray-500">
                                         <div className="flex items-center gap-1">
                                             <Clock className="w-4 h-4" />
-                                            <span>{recipe.prep_time_minutes + recipe.cook_time_minutes}m</span>
+                                            <span>{(recipe.prep_time_minutes || 0) + (recipe.cook_time_minutes || 0)}m</span>
                                         </div>
                                         <div className="flex items-center gap-1">
                                             <Users className="w-4 h-4" />
