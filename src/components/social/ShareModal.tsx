@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Copy, Link as LinkIcon, RefreshCw, Trash2, X, Check, Globe } from 'lucide-react'
-import { Dialog } from '@/components/ui/Dialog'
+
 
 interface ShareModalProps {
     isOpen: boolean
@@ -179,8 +179,8 @@ export function ShareModal({ isOpen, onClose, recipeId, recipeTitle }: ShareModa
                                     <button
                                         onClick={copyToClipboard}
                                         className={`px-4 rounded-lg font-medium transition-all flex items-center gap-2 ${copied
-                                                ? 'bg-green-100 text-green-700'
-                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                            ? 'bg-green-100 text-green-700'
+                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                             }`}
                                     >
                                         {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
