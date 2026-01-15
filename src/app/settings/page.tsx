@@ -6,6 +6,7 @@ import { useAuth } from '@/components/auth/AuthProvider'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { ArrowLeft, User, Users, Copy, Check, Loader2, Home } from 'lucide-react'
 import Link from 'next/link'
+import { InstallAppButton } from '@/components/pwa/InstallAppButton'
 
 interface HouseholdInfo {
     id: string
@@ -102,6 +103,9 @@ export default function SettingsPage() {
                     <h1 className="text-3xl font-bold text-gray-900 mb-8">Settings</h1>
 
                     <div className="grid gap-6 max-w-2xl">
+                        {/* Install App Section */}
+                        <InstallAppButton />
+
                         {/* Profile Section */}
                         <section className="bg-white rounded-2xl shadow-sm p-6">
                             <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
