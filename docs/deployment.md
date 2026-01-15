@@ -37,7 +37,9 @@ The easiest way to host this application is using **Vercel** (the creators of Ne
 4.  **Environment Variables**: Vercel will ask for environment variables. You must copy the values from your `.env.local` file:
     - `NEXT_PUBLIC_SUPABASE_URL`
     - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-5.  Click **Deploy**.
+    - `SUPABASE_SERVICE_ROLE_KEY` (Used for server-side API routes)
+5.  **Build Settings**: Vercel automatically detects Next.js projects. You generally **do not** need to change the "Build and Output Settings" (Build Command, Output Directory, etc.). The defaults (`next build`) work out of the box.
+6.  Click **Deploy**.
 
 **Benefits**:
 - Automatic HTTPS (SSL).

@@ -48,7 +48,8 @@ export default function CommunityPage() {
                 .eq('follower_user_id', user.id)
 
             if (error) throw error
-            setFollowing(data || [])
+            // Supabase types might infer the relation as an array, but we expect a single object
+            setFollowing((data as unknown as FollowedHousehold[]) || [])
         } catch (err) {
             console.error('Error loading follows:', err)
         } finally {
@@ -201,8 +202,8 @@ export default function CommunityPage() {
                                                     onClick={() => !followed ? handleFollow(household.id) : null}
                                                     disabled={followed || actionLoading === household.id}
                                                     className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center gap-2 ${followed
-                                                            ? 'bg-green-100 text-green-700 cursor-default'
-                                                            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                                                        ? 'bg-green-100 text-green-700 cursor-default'
+                                                        : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
                                                         }`}
                                                 >
                                                     {actionLoading === household.id ? (
