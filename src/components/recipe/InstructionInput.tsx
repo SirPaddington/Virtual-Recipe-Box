@@ -77,13 +77,38 @@ export function InstructionInput({ instructions, onChange }: InstructionInputPro
                                 value={instruction.content}
                                 onChange={(e) => updateInstruction(index, 'content', e.target.value)}
                                 placeholder="Describe this step..."
-                                rows={2}
+                                rows={4}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
                                 required
                             />
 
+                            {/* Optional timing and temperature */}
+                            <div className="flex gap-4">
+                                <div className="flex items-center gap-2">
+                                    <label className="text-xs text-gray-600">Time:</label>
+                                    <input
+                                        type="number"
+                                        value={instruction.duration_minutes ?? ''}
+                                        onChange={(e) => updateInstruction(index, 'duration_minutes', e.target.value ? parseInt(e.target.value) : null)}
+                                        placeholder="mins"
+                                        className="w-20 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                    />
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    <label className="text-xs text-gray-600">Temp:</label>
+                                    <input
+                                        type="text"
+                                        value={instruction.temperature ?? ''}
+                                        onChange={(e) => updateInstruction(index, 'temperature', e.target.value || null)}
+                                        placeholder="e.g., 350°F"
+                                        className="w-28 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                    />
+                                </div>
+                            </div>
+
                             {/* Image Upload */}
-                            <div className="flex items-start gap-4">
+                            <div className="flex items-start gap-2">
                                 <div className="w-32">
                                     <ImageUpload
                                         value={instruction.image?.url}
@@ -92,31 +117,6 @@ export function InstructionInput({ instructions, onChange }: InstructionInputPro
                                         className="w-full"
                                     />
                                     <p className="text-[10px] text-gray-500 text-center mt-1">Step Photo</p>
-                                </div>
-
-                                {/* Optional timing and temperature */}
-                                <div className="flex gap-4 pt-2">
-                                    <div className="flex items-center gap-2">
-                                        <label className="text-xs text-gray-600">Time:</label>
-                                        <input
-                                            type="number"
-                                            value={instruction.duration_minutes ?? ''}
-                                            onChange={(e) => updateInstruction(index, 'duration_minutes', e.target.value ? parseInt(e.target.value) : null)}
-                                            placeholder="mins"
-                                            className="w-20 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                                        />
-                                    </div>
-
-                                    <div className="flex items-center gap-2">
-                                        <label className="text-xs text-gray-600">Temp:</label>
-                                        <input
-                                            type="text"
-                                            value={instruction.temperature ?? ''}
-                                            onChange={(e) => updateInstruction(index, 'temperature', e.target.value || null)}
-                                            placeholder="e.g., 350°F"
-                                            className="w-28 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                                        />
-                                    </div>
                                 </div>
                             </div>
                         </div>
