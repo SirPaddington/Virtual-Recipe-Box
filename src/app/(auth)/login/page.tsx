@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { setSessionPreference } from '@/lib/session-manager'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Mail, Lock, Loader2 } from 'lucide-react'
@@ -13,6 +14,7 @@ export default function LoginPage() {
     const [error, setError] = useState('')
     const [message, setMessage] = useState('')
     const [useMagicLink, setUseMagicLink] = useState(false)
+    const [rememberMe, setRememberMe] = useState(false)
     const router = useRouter()
     const supabase = createClient()
 
@@ -28,6 +30,9 @@ export default function LoginPage() {
             })
 
             if (error) throw error
+
+            // Save Remember Me preference
+            setSessionPreference(rememberMe)
 
             router.push('/recipes')
             router.refresh()
@@ -79,8 +84,8 @@ export default function LoginPage() {
                             type="button"
                             onClick={() => setUseMagicLink(false)}
                             className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${!useMagicLink
-                                    ? 'bg-white text-gray-900 shadow-sm'
-                                    : 'text-gray-600 hover:text-gray-900'
+                                ? 'bg-white text-gray-900 shadow-sm'
+                                : 'text-gray-600 hover:text-gray-900'
                                 }`}
                         >
                             Password
@@ -89,8 +94,8 @@ export default function LoginPage() {
                             type="button"
                             onClick={() => setUseMagicLink(true)}
                             className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${useMagicLink
-                                    ? 'bg-white text-gray-900 shadow-sm'
-                                    : 'text-gray-600 hover:text-gray-900'
+                                ? 'bg-white text-gray-900 shadow-sm'
+                                : 'text-gray-600 hover:text-gray-900'
                                 }`}
                         >
                             Magic Link
@@ -131,23 +136,39 @@ export default function LoginPage() {
 
                         {/* Password Field (only for password login) */}
                         {!useMagicLink && (
-                            <div className="mb-6">
-                                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Password
-                                </label>
-                                <div className="relative">
-                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                                    <input
-                                        id="password"
-                                        type="password"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        required
-                                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                                        placeholder="••••••••"
-                                    />
+                            <>
+                                <div className="mb-4">
+                                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                                        Password
+                                    </label>
+                                    <div className="relative">
+                                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                        <input
+                                            id="password"
+                                            type="password"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            required
+                                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                            placeholder="••••••••"
+                                        />
+                                    </div>
                                 </div>
-                            </div>
+
+                                {/* Remember Me Checkbox */}
+                                <div className="mb-6 flex items-center">
+                                    <input
+                                        id="remember-me"
+                                        type="checkbox"
+                                        checked={rememberMe}
+                                        onChange={(e) => setRememberMe(e.target.checked)}
+                                        className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
+                                    />
+                                    <label htmlFor="remember-me" className="ml-2 text-sm text-gray-700">
+                                        Remember me for 60 days
+                                    </label>
+                                </div>
+                            </>
                         )}
 
                         {/* Submit Button */}

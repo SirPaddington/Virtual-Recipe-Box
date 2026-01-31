@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
+import { BiometricSetup } from '@/components/BiometricSetup'
 import { ArrowLeft, User, Users, Copy, Check, Loader2, Home } from 'lucide-react'
 import Link from 'next/link'
 import { InstallAppButton } from '@/components/pwa/InstallAppButton'
@@ -105,6 +106,11 @@ export default function SettingsPage() {
                     <div className="grid gap-6 max-w-2xl">
                         {/* Install App Section */}
                         <InstallAppButton />
+
+                        {/* Biometric Authentication Section */}
+                        <section>
+                            <BiometricSetup />
+                        </section>
 
                         {/* Profile Section */}
                         <section className="bg-white rounded-2xl shadow-sm p-6">

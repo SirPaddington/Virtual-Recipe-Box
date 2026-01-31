@@ -11,6 +11,7 @@ interface ImageUploadProps {
     onRemove?: () => void
     className?: string
     bucketName?: string
+    compact?: boolean
 }
 
 export function ImageUpload({
@@ -18,7 +19,8 @@ export function ImageUpload({
     onChange,
     onRemove,
     className = "",
-    bucketName = "recipe-images"
+    bucketName = "recipe-images",
+    compact = false
 }: ImageUploadProps) {
     const [uploading, setUploading] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -104,24 +106,26 @@ export function ImageUpload({
                 <div
                     onClick={() => fileInputRef.current?.click()}
                     className={`
-                        border-2 border-dashed border-gray-300 rounded-lg p-6 
-                        flex flex-col items-center justify-center cursor-pointer
+                        border-2 border-dashed border-gray-300 rounded-lg
+                        flex ${compact ? 'flex-row' : 'flex-col'} items-center justify-center cursor-pointer
                         hover:border-orange-500 hover:bg-orange-50 transition-colors
-                        bg-gray-50 aspect-video
+                        bg-gray-50 ${compact ? 'p-3 gap-3' : 'p-6 aspect-video'}
                         ${uploading ? 'opacity-50 pointer-events-none' : ''}
                     `}
                 >
                     {uploading ? (
-                        <Loader2 className="w-8 h-8 text-orange-500 animate-spin mb-2" />
+                        <Loader2 className={`${compact ? 'w-5 h-5' : 'w-8 h-8'} text-orange-500 animate-spin ${compact ? '' : 'mb-2'}`} />
                     ) : (
-                        <ImageIcon className="w-8 h-8 text-gray-400 mb-2" />
+                        <ImageIcon className={`${compact ? 'w-5 h-5' : 'w-8 h-8'} text-gray-400 ${compact ? '' : 'mb-2'}`} />
                     )}
-                    <span className="text-sm font-medium text-gray-600">
-                        {uploading ? 'Uploading...' : 'Click to upload image'}
-                    </span>
-                    <span className="text-xs text-gray-400 mt-1">
-                        Max 5MB
-                    </span>
+                    <div className={`${compact ? 'flex items-center gap-2' : 'flex flex-col items-center'}`}>
+                        <span className={`${compact ? 'text-xs' : 'text-sm'} font-medium text-gray-600`}>
+                            {uploading ? 'Uploading...' : compact ? 'Upload step photo' : 'Click to upload image'}
+                        </span>
+                        <span className="text-xs text-gray-400">
+                            Max 5MB
+                        </span>
+                    </div>
                 </div>
             )}
 
