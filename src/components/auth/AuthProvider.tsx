@@ -18,6 +18,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null)
     const [loading, setLoading] = useState(true)
     const [showReauthModal, setShowReauthModal] = useState(false)
+    const [isLocked, setIsLocked] = useState(false)
     const supabase = createClient()
 
     useEffect(() => {
@@ -76,6 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const handleReauthSuccess = () => {
         setShowReauthModal(false)
+        setIsLocked(false)
     }
 
     const handleReauthClose = () => {
@@ -91,6 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 isOpen={showReauthModal}
                 onClose={handleReauthClose}
                 onSuccess={handleReauthSuccess}
+                isLocked={isLocked}
             />
         </AuthContext.Provider>
     )

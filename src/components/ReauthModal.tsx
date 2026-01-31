@@ -9,9 +9,10 @@ interface ReauthModalProps {
     isOpen: boolean
     onClose: () => void
     onSuccess: () => void
+    isLocked?: boolean
 }
 
-export function ReauthModal({ isOpen, onClose, onSuccess }: ReauthModalProps) {
+export function ReauthModal({ isOpen, onClose, onSuccess, isLocked = false }: ReauthModalProps) {
     const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
@@ -30,10 +31,14 @@ export function ReauthModal({ isOpen, onClose, onSuccess }: ReauthModalProps) {
             const success = await authenticateWithBiometric()
 
             if (success) {
-                // Refresh the session
-                const { error: refreshError } = await supabase.auth.refreshSession()
+                // If just unlocking, we don't necessarily need to refresh session if it's valid,
+                // but checking it is good practice.
+                // If strictly re-authing (expired), we MUST refresh.
 
-                if (refreshError) throw refreshError
+                if (!isLocked) {
+                    const { error: refreshError } = await supabase.auth.refreshSession()
+                    if (refreshError) throw refreshError
+                }
 
                 onSuccess()
                 onClose()
@@ -78,20 +83,33 @@ export function ReauthModal({ isOpen, onClose, onSuccess }: ReauthModalProps) {
     if (!isOpen) return null
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
             <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-bold text-gray-900">Session Expired</h2>
-                    <button
-                        onClick={onClose}
-                        className="text-gray-400 hover:text-gray-600"
-                    >
-                        <X className="w-5 h-5" />
-                    </button>
+                    <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                        {isLocked ? (
+                            <>
+                                <Lock className="w-5 h-5 text-orange-500" />
+                                App Locked
+                            </>
+                        ) : (
+                            'Session Expired'
+                        )}
+                    </h2>
+                    {!isLocked && (
+                        <button
+                            onClick={onClose}
+                            className="text-gray-400 hover:text-gray-600"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                    )}
                 </div>
 
                 <p className="text-gray-600 mb-6">
-                    Your session has expired. Please re-authenticate to continue.
+                    {isLocked
+                        ? 'Please verify your identity to access the app.'
+                        : 'Your session has expired. Please re-authenticate to continue.'}
                 </p>
 
                 {error && (
