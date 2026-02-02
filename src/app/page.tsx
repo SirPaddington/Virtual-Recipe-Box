@@ -1,7 +1,16 @@
 import { ChefHat, Users, BookMarked, ShoppingBag } from 'lucide-react'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 
-export default function Home() {
+export default async function Home() {
+  const supabase = await createClient()
+  const { data: { session } } = await supabase.auth.getSession()
+
+  if (session) {
+    redirect('/recipes')
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50">
       <div className="container mx-auto px-4 py-16">
