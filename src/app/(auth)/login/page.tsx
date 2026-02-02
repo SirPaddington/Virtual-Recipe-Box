@@ -38,6 +38,13 @@ export default function LoginPage() {
         }
     }
 
+    // Debug helper
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            console.log('Checking biometrics:', localStorage.getItem('recipe-box-webauthn-credentials'))
+        }
+    }, [])
+
     const handleEmailLogin = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoading(true)

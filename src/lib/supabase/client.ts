@@ -9,8 +9,15 @@ export function createClient() {
                 persistSession: true,
                 autoRefreshToken: true,
                 detectSessionInUrl: true,
-                storage: typeof window !== 'undefined' ? window.localStorage : undefined,
             },
+            cookieOptions: {
+                name: 'sb-virtual-recipe-box-auth-token',
+                // lifetime: 1 year for PWA persistence
+                maxAge: 60 * 60 * 24 * 365,
+                domain: '',
+                path: '/',
+                sameSite: 'lax',
+            }
         }
     )
 }

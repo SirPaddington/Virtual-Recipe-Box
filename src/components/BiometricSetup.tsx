@@ -52,6 +52,11 @@ export function BiometricSetup() {
 
         try {
             await registerBiometric(user.id, user.email || '')
+            // Check if it was actually saved
+            const saved = localStorage.getItem('recipe-box-webauthn-credentials')
+            console.log('Credential saved check:', !!saved)
+            if (!saved) throw new Error('Failed to save biometric credential to local storage')
+
             setHasCredential(true)
             setSuccess('Biometric authentication enabled successfully!')
         } catch (err: any) {
