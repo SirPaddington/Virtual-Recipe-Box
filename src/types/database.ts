@@ -24,6 +24,7 @@ export interface Household {
     id: string
     name: string
     owner_id: string
+    allow_member_edits: boolean
     created_at: string
 }
 

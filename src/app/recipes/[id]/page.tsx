@@ -46,7 +46,11 @@ export default function RecipeDetailPage() {
                 .from('recipes')
                 .select(`
                   *,
-                  author:users!author_id(id, display_name)
+                  author:users!author_id(id, display_name),
+                  households (
+                      id,
+                      allow_member_edits
+                  )
                 `)
                 .eq('id', id)
                 .single()
@@ -166,6 +170,12 @@ export default function RecipeDetailPage() {
     }
 
     const isAuthor = user?.id === recipe?.author_id
+    // Check if household allows member edits and recipe is household visibility
+    // Note: If user can view 'household' recipe, they are a member (enforced by RLS)
+    const canEdit = isAuthor || (
+        recipe?.visibility === 'household' &&
+        (recipe as any).households?.allow_member_edits
+    )
 
     if (loading) {
         return (
@@ -215,7 +225,7 @@ export default function RecipeDetailPage() {
                                 <Share2 className="w-5 h-5" />
                             </button>
                         )}
-                        {isAuthor && (
+                        {canEdit && (
                             <Link
                                 href={`/recipes/${recipe.id}/edit`}
                                 className="p-2 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
@@ -355,15 +365,17 @@ export default function RecipeDetailPage() {
                                     <Plus className="w-4 h-4" />
                                     Create Variation
                                 </Link>
+                                {canEdit && (
+                                    <Link
+                                        href={`/recipes/${recipe.id}/edit`}
+                                        className="flex-1 sm:flex-initial px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 flex items-center justify-center gap-2"
+                                    >
+                                        <Edit2 className="w-4 h-4" />
+                                        Edit
+                                    </Link>
+                                )}
                                 {isAuthor && (
                                     <>
-                                        <Link
-                                            href={`/recipes/${recipe.id}/edit`}
-                                            className="flex-1 sm:flex-initial px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 flex items-center justify-center gap-2"
-                                        >
-                                            <Edit2 className="w-4 h-4" />
-                                            Edit
-                                        </Link>
                                         <button
                                             onClick={handleDelete}
                                             disabled={deleting}

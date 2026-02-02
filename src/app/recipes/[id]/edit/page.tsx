@@ -46,14 +46,28 @@ export default function EditRecipePage() {
             // Load recipe
             const { data: recipeData, error: recipeError } = await supabase
                 .from('recipes')
-                .select('*')
+                .select(`
+                    *,
+                    households (
+                        id,
+                        allow_member_edits
+                    )
+                `)
                 .eq('id', params.id)
                 .single()
 
             if (recipeError) throw recipeError
 
-            // Check if user is the author
-            if (recipeData.author_id !== user?.id) {
+            // Check permission: Author OR (Household Member with permission)
+            // Note: RLS ensures we can only see the recipe if we are author OR member (for household/followers) OR public (but public ones shouldn't generally be editable by others unless explicitly allowed, here we only care about household edit setting)
+            // Stricter check:
+            const isAuthor = recipeData.author_id === user?.id
+            const isHouseholdAndAllowed =
+                recipeData.visibility === 'household' &&
+                (recipeData as any).households?.allow_member_edits
+
+            if (!isAuthor && !isHouseholdAndAllowed) {
+                console.log('Access denied: User is not author and household editing is not enabled', { isAuthor, isHouseholdAndAllowed })
                 router.push(`/recipes/${params.id}`)
                 return
             }

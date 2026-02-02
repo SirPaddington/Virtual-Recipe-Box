@@ -15,6 +15,7 @@ interface HouseholdInfo {
     invite_code: string | null
     role: 'owner' | 'admin' | 'member'
     members_count: number
+    allow_member_edits: boolean
 }
 
 export default function SettingsPage() {
@@ -24,6 +25,7 @@ export default function SettingsPage() {
     const [household, setHousehold] = useState<HouseholdInfo | null>(null)
     const [loading, setLoading] = useState(true)
     const [copied, setCopied] = useState(false)
+    const [updating, setUpdating] = useState(false)
 
     useEffect(() => {
         if (user) {
@@ -41,7 +43,8 @@ export default function SettingsPage() {
                     households (
                         id,
                         name,
-                        invite_code
+                        invite_code,
+                        allow_member_edits
                     )
                 `)
                 .eq('user_id', user!.id)
@@ -68,7 +71,8 @@ export default function SettingsPage() {
                 name: householdData.name,
                 invite_code: householdData.invite_code,
                 role: memberData.role,
-                members_count: count || 1
+                members_count: count || 1,
+                allow_member_edits: householdData.allow_member_edits || false
             })
         } catch (err) {
             console.error('Error loading household:', err)
@@ -82,6 +86,29 @@ export default function SettingsPage() {
             navigator.clipboard.writeText(household.invite_code)
             setCopied(true)
             setTimeout(() => setCopied(false), 2000)
+        }
+    }
+
+    const toggleMemberEdits = async () => {
+        if (!household || updating) return
+
+        setUpdating(true)
+        try {
+            const newValue = !household.allow_member_edits
+
+            const { error } = await supabase
+                .from('households')
+                .update({ allow_member_edits: newValue })
+                .eq('id', household.id)
+
+            if (error) throw error
+
+            setHousehold(prev => prev ? { ...prev, allow_member_edits: newValue } : null)
+        } catch (err) {
+            console.error('Error updating household setting:', err)
+            alert('Failed to update setting')
+        } finally {
+            setUpdating(false)
         }
     }
 
@@ -155,8 +182,10 @@ export default function SettingsPage() {
                                         </div>
                                     </div>
 
-                                    <div className="border-t border-gray-100 pt-4">
-                                        {household.role === 'owner' || household.role === 'admin' ? (
+                                    {/* Settings for Owner/Admin */}
+                                    {(household.role === 'owner' || household.role === 'admin') && (
+                                        <div className="border-t border-gray-100 pt-4 space-y-4">
+                                            {/* Invite Code */}
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                                     Invite Code
@@ -183,12 +212,48 @@ export default function SettingsPage() {
                                                     Share this code with family members to let them join your household.
                                                 </p>
                                             </div>
-                                        ) : (
-                                            <div className="text-sm text-gray-500 italic">
-                                                Only household owners can view the invite code.
+
+                                            {/* Shared Editing Setting */}
+                                            <div className="flex items-start justify-between gap-4 pt-2">
+                                                <div>
+                                                    <label className="text-sm font-medium text-gray-900 block">
+                                                        Allow member editing
+                                                    </label>
+                                                    <p className="text-sm text-gray-500 mt-1">
+                                                        Let household members edit recipes created by others in the household.
+                                                    </p>
+                                                </div>
+                                                <button
+                                                    onClick={toggleMemberEdits}
+                                                    disabled={updating}
+                                                    className={`
+                                                        relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2
+                                                        ${household.allow_member_edits ? 'bg-orange-500' : 'bg-gray-200'}
+                                                        ${updating ? 'opacity-50 cursor-wait' : ''}
+                                                    `}
+                                                    role="switch"
+                                                    aria-checked={household.allow_member_edits}
+                                                >
+                                                    <span className="sr-only">Allow member editing</span>
+                                                    <span
+                                                        aria-hidden="true"
+                                                        className={`
+                                                            pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out
+                                                            ${household.allow_member_edits ? 'translate-x-5' : 'translate-x-0'}
+                                                        `}
+                                                    />
+                                                </button>
                                             </div>
-                                        )}
-                                    </div>
+                                        </div>
+                                    )}
+
+                                    {household.role === 'member' && (
+                                        <div className="border-t border-gray-100 pt-4">
+                                            <div className="text-sm text-gray-500 italic">
+                                                Contact your household admin to manage invites and settings.
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             ) : (
                                 <div className="text-red-500">Could not load household information.</div>

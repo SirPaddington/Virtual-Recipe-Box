@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { setSessionPreference } from '@/lib/session-manager'
 import Link from 'next/link'
@@ -15,8 +15,28 @@ export default function LoginPage() {
     const [message, setMessage] = useState('')
     const [useMagicLink, setUseMagicLink] = useState(false)
     const [rememberMe, setRememberMe] = useState(false)
+    const [hasBiometrics, setHasBiometrics] = useState(false)
     const router = useRouter()
     const supabase = createClient()
+
+    useEffect(() => {
+        // Check if we have biometric credentials saved
+        if (typeof window !== 'undefined') {
+            const hasCreds = localStorage.getItem('recipe-box-webauthn-credentials')
+            setHasBiometrics(!!hasCreds)
+        }
+    }, [])
+
+    const handleBiometricClick = async () => {
+        // Since we don't have Full Passkey logic yet, we can't "Login" from cold start
+        // But we can check if there's a session hanging around or guide the user
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session) {
+            router.push('/recipes')
+        } else {
+            setError('Please sign in with password once to re-enable biometric access.')
+        }
+    }
 
     const handleEmailLogin = async (e: React.FormEvent) => {
         e.preventDefault()
