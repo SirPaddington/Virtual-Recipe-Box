@@ -2,6 +2,7 @@ import { ChefHat, Users, BookMarked, ShoppingBag } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { HomeRedirect } from '@/components/auth/HomeRedirect'
 
 export default async function Home() {
   const supabase = await createClient()
@@ -13,6 +14,7 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50">
+      <HomeRedirect />
       <div className="container mx-auto px-4 py-16">
         {/* Hero Section */}
         <div className="text-center mb-16">
